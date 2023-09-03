@@ -25,9 +25,9 @@ is truncated to match shorter option length.
 
 You can control, how frequently symbols are randomized with `map_frequency` parameter, which accepts values:
 
-    - `program` - symbols are chosen once
-    - `line` - symbols are different for each line
-    - `cell` - choose random symbol for each cell (total mess, unless you colorize it)
+- `program` - symbols are chosen once
+- `line` - symbols are different for each line
+- `cell` - choose random symbol for each cell (total mess, unless you colorize it)
 
 You can also provide `r` value for `rule`, `width` and `height` to randomize value with default range (`0-255` or `1-1000`).
 
