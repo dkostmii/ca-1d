@@ -7,69 +7,148 @@
 #include "include/params.h"
 #include "include/arg.h"
 
-int main(int argc, char** argv) {
-	Params* params = (Params*) malloc(sizeof(Params));
+int create_params(Params** result) {
+	if (result == NULL) {
+		return -1;
+	}
 
-	params->rule = 90;
-	params->height = 10;
-	params->width = 11;
-	strcpy(params->map, " X");
+	if (*result != NULL) {
+		return -1;
+	}
+
+	*result = (Params*) malloc(sizeof(Params));
+
+	if (result == NULL) {
+		return -1;
+	}
+
+	(*result)->rule = 90;
+	(*result)->height = 10;
+	(*result)->width = 11;
+	(*result)->map_frequency = MAP_FREQ_PROGRAM;
+
+	(*result)->map_alive = (char*) malloc(2 * sizeof(char));
+
+	if ((*result)->map_alive == NULL) {
+		free(result);
+		return -1;
+	}
+
+	(*result)->map_dead = (char*) malloc(2 * sizeof(char));
+
+	if ((*result)->map_dead == NULL) {
+		free((*result)->map_dead);
+		free(*result);
+		return -1;
+	}
+
+	strcpy((*result)->map_alive, "X");
+	strcpy((*result)->map_dead, " ");
+	(*result)->map_alive[1] = '\0';
+	(*result)->map_dead[1] = '\0';
+
+	return 0;
+}
+
+int destroy_params(Params* params) {
+	if (params == NULL) {
+		return -1;
+	}
+
+	if (params->map_alive != NULL) {
+		free(params->map_alive);
+	}
+
+	if (params->map_dead != NULL) {
+		free(params->map_dead);
+	}
+
+	free(params);
+	return 0;
+}
+
+int main(int argc, char** argv) {
+	Params* params = NULL;
+	create_params(&params);
 
 	if (argc > 0) {
 		srand(time(NULL));
 		int parse_res = parse_args(argc, argv, params);
 
 		if (parse_res < 0) {
-			free(params);
+			destroy_params(params);
 			return -1;
 		}
 
 		if (parse_res == 1) {
-			free(params);
+			destroy_params(params);
 			return 0;
 		}
 	}
 
-	int* state = (int*) malloc(params->width * sizeof(int));
+	int checkout_params_res = checkout_params(params);
 
-	if (state == NULL) {
-		free(params);
+	if (checkout_params < 0) {
+		destroy_params(params);
 		return -1;
 	}
 
-	for (int i = 0; i < params->width; i++) {
-		state[i] = 0;
+	int** states = (int**) malloc(params->height * sizeof(int*));
+	states[0] = (int*) malloc(params->width * sizeof(int));
+
+	if (states[0] == NULL) {
+		free(states);
+		destroy_params(params);
+		return -1;
 	}
 
-	state[(params->width - 1) / 2] = 1;
+	int seed_res = seed_state(&states[0], params->width);
 
-	for (int i = 0; i < params->height; i++) {
-		int print_err = print_state(state, params->width, params->map);
+	if (seed_res < 0 && states[0] != NULL) {
+		free(states[0]);
+	}
 
-		if (print_err < 0) {
-			free(state);
-			return -1;
-		}
+	if (seed_res < 0) {
+		free(states);
+		destroy_params(params);
+		return -1;
+	}
 
+	for (int i = 1; i < params->height; i++) {
 		int* next_state_arr = NULL;
-		int next_state_err = next_state(state, params->width, params->rule, &next_state_arr);
+		int next_state_err = next_state(states[i - 1], params->width, params->rule, &next_state_arr);
 
 		if (next_state_err < 0 && next_state_arr != NULL) {
 			free(next_state_arr);
 		}
 
 		if (next_state_err < 0) {
-			free(params);
-			free(state);
-			return -1;
+			for (int j = 0; j < i; j++) {
+				free(states[j]);
+			}
+			free(states);
+			destroy_params(params);
 		}
 
-		free(state);
-		state = next_state_arr;
+		states[i] = next_state_arr;
 	}
 
-	free(params);
-	free(state);
+	int print_states_res = print_states(states, *params);
+
+	if (print_states_res < 0) {
+		for (int i = 0; i < params->height; i++) {
+			free(states[i]);
+		}
+		free(states);
+		destroy_params(params);
+		return -1;
+	}
+
+	for (int i = 0; i < params->height; i++) {
+		free(states[i]);
+	}
+	free(states);
+	destroy_params(params);
 
 	return 0;
 }

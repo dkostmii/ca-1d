@@ -40,6 +40,10 @@ int cycle(int value, int min, int max) {
 		max = temp;
 	}
 
+	if (min == max) {
+		return min;
+	}
+
 	return mod(value, max - min + 1) + min;
 }
 
@@ -48,6 +52,10 @@ int clamp(int value, int min, int max) {
 		int temp = min;
 		min = max;
 		max = temp;
+	}
+
+	if (min == max) {
+		return min;
 	}
 
 	if (value < min) {

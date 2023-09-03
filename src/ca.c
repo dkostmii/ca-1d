@@ -138,3 +138,23 @@ int next_state(int* state, int state_len, int rule, int** next) {
 
 	return 0;
 }
+
+int seed_state(int** state, int state_len) {
+	if (state == NULL || *state == NULL) {
+		return -1;
+	}
+
+	if (state_len < 1) {
+		return -1;
+	}
+
+	for (int i = 0; i < state_len; i++) {
+		*(*state+i) = 0;
+	}
+
+	int half = (state_len - 1) / 2;
+
+	*(*state+half) = 1;
+
+	return 0;
+}

@@ -27,8 +27,10 @@ int choose_random(char* arg_value, char** result) {
 
 	int tokens_len = 1;
 	char** tokens = (char**) malloc(sizeof(char*));
-	tokens[0] = (char*) malloc(strlen(value_token) * sizeof(char));
+	int value_token_len = strlen(value_token);
+	tokens[0] = (char*) malloc((value_token_len + 1) * sizeof(char));
 	strcpy(tokens[0], value_token);
+	tokens[0][value_token_len] = '\0';
 
 	while (value_token != NULL) {
 		value_token = strtok(NULL, ",;|");
@@ -47,7 +49,7 @@ int choose_random(char* arg_value, char** result) {
 
 			int last_id = tokens_len - 1;
 			int value_token_len = strlen(value_token);
-			tokens[last_id] = (char*) malloc(value_token_len * sizeof(char));
+			tokens[last_id] = (char*) malloc((value_token_len + 1) * sizeof(char));
 			strcpy(tokens[last_id], value_token);
 			tokens[last_id][value_token_len] = '\0';
 		}
@@ -57,8 +59,9 @@ int choose_random(char* arg_value, char** result) {
 	char* rnd_result = tokens[rnd_id];
 	int rnd_result_len = strlen(rnd_result);
 
-	*result = (char*) malloc(rnd_result_len * sizeof(char));
+	*result = (char*) malloc((rnd_result_len + 1) * sizeof(char));
 	strcpy(*result, rnd_result);
+	(*result)[rnd_result_len] = '\0';
 
 	for (int i = 0; i < tokens_len; i++) {
 		free(tokens[i]);

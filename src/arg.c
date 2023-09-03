@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "include/arg.h"
+#include "include/params.h"
 #include "include/math_op.h"
 #include "include/rnd.h"
 
@@ -39,13 +40,13 @@ int parse_range(char* arg_value, int* min, int* max) {
 		return -1;
 	}
 
-	char* min_str = (char*) malloc(min_len * sizeof(char));
+	char* min_str = (char*) malloc((min_len + 1) * sizeof(char));
 
 	if (min_str == NULL) {
 		return -1;
 	}
 
-	char* max_str = (char*) malloc(max_len * sizeof(char));
+	char* max_str = (char*) malloc((max_len + 1) * sizeof(char));
 
 	if (max_str == NULL) {
 		free(min_str);
@@ -171,7 +172,7 @@ int parse_arg(char* arg, Params* params) {
 		return -1;
 	}
 
-	char* name = (char*) malloc(name_len * sizeof(char));
+	char* name = (char*) malloc((name_len + 1) * sizeof(char));
 
 	if (name == NULL) {
 		return -1;
@@ -188,7 +189,7 @@ int parse_arg(char* arg, Params* params) {
 		return -1;
 	}
 
-	char* value = (char*) malloc(value_len * sizeof(char));
+	char* value = (char*) malloc((value_len + 1) * sizeof(char));
 	strncpy(value, arg+value_pos, value_len);
 	value[value_len] = '\0';
 
@@ -252,29 +253,67 @@ int parse_arg(char* arg, Params* params) {
 		free(name);
 		free(value);
 		return 0;
-	} else if (strcmp(name, "map") == 0) {
-		if (value_len < 2) {
+	} else if (strcmp(name, "map_frequency") == 0) {
+		if (value_len < 1) {
 			free(name);
 			free(value);
 			return -1;
 		}
 
-		if (value_len > 2) {
-			int first_id = range(0, value_len - 1);
-			int second_id = range(0, value_len - 1);
-			while (second_id == first_id) {
-				second_id = range(0, value_len - 1);
-			}
+		if (strcmp(value, "program") == 0) {
+			params->map_frequency = MAP_FREQ_PROGRAM;
+		} else if (strcmp(value, "line") == 0) {
+			params->map_frequency = MAP_FREQ_LINE;
+		} else if (strcmp(value, "cell") == 0) {
+			params->map_frequency = MAP_FREQ_CELL;
+		} else if (strcmp(value, "r") == 0) {
+			const int values_len = 3;
+			int values[] = { MAP_FREQ_PROGRAM, MAP_FREQ_LINE, MAP_FREQ_CELL };
 
-			params->map[0] = value[first_id];
-			params->map[1] = value[second_id];
-
+			int values_id = range(0, values_len - 1);
+			params->map_frequency = values[values_id];
+		} else {
 			free(name);
 			free(value);
-			return 0;
+			return -1;
 		}
 
-		strncpy(params->map, value, 2);
+		free(name);
+		free(value);
+		return 0;
+	} else if (strcmp(name, "map_alive") == 0) {
+		if (value_len < 1) {
+			free(name);
+			free(value);
+			return -1;
+		}
+
+		if (params->map_alive != NULL) {
+			free(params->map_alive);
+		}
+
+		params->map_alive = (char*) malloc((value_len + 1) * sizeof(char));
+		strcpy(params->map_alive, value);
+		params->map_alive[value_len] = '\0';
+
+		free(name);
+		free(value);
+		return 0;
+	} else if (strcmp(name, "map_dead") == 0) {
+		if (value_len < 1) {
+			free(name);
+			free(value);
+			return -1;
+		}
+
+		if (params->map_dead != NULL) {
+			free(params->map_dead);
+		}
+
+		params->map_dead = (char*) malloc((value_len + 1) * sizeof(char));
+		strcpy(params->map_dead, value);
+		params->map_dead[value_len] = '\0';
+
 		free(name);
 		free(value);
 		return 0;
@@ -286,13 +325,20 @@ int parse_arg(char* arg, Params* params) {
 }
 
 int parse_args(int argc, char** argv, Params* params) {
+	const int usage_lines_len = 4;
+	const char* usage_lines[] = {
+		"\t%s --help\n",
+		"\t%s --rule=[0-255] --width=[1-1000] --height=[1-1000] --map_alive=C... --map_dead=C... --map_frequency=program|line|cell\n",
+		"\t%s --rule=[0-255,;|...] --width=[1-1000,;|...] --height=[1-1000,;|...] --map_alive=C... --map_dead=C... --map_frequency=program|line|cell\n",
+		"\t%s --rule=r --width=r --height=r --map_alive=C... --map_dead=C... --map_frequency=r\n"
+	};
+
 	for (int i = 1; i < argc; i++) {
 		if (strncmp(argv[i], "--help", strlen("--help")) == 0) {
 			printf("Usage:\n");
-			printf("\t%s --help\n", argv[0]);
-			printf("\t%s --rule=[0-255] --width=[1-1000] --height=[1-1000] --map=CC...\n", argv[0]);
-			printf("\t%s --rule=[0-255,;|...] --width=[1-1000,;|...] --height=[1-1000,;|...] --map=CC...\n", argv[0]);
-			printf("\t%s --rule=r --width=r --height=r --map=CC...\n", argv[0]);
+			for (int i = 0; i < usage_lines_len; i++) {
+				printf(usage_lines[i], argv[0]);
+			}
 			return 1;
 		}
 
@@ -301,10 +347,9 @@ int parse_args(int argc, char** argv, Params* params) {
 		if (parse_arg_res < 0) {
 			fprintf(stderr, "Invalid arg: %s\n", argv[i]);
 			fprintf(stderr, "Usage:\n");
-			fprintf(stderr, "\t%s --help\n", argv[0]);
-			fprintf(stderr, "\t%s --rule=[0-255] --width=[1-1000] --height=[1-1000] --map=CC...\n", argv[0]);
-			fprintf(stderr, "\t%s --rule=[0-255,;|...] --width=[1-1000,;|...] --height=[1-1000,;|...] --map=CC...\n", argv[0]);
-			fprintf(stderr, "\t%s --rule=r --width=r --height=r --map=CC...\n", argv[0]);
+			for (int i = 0; i < usage_lines_len; i++) {
+				fprintf(stderr, usage_lines[i], argv[0]);
+			}
 			return -1;
 		}
 	}
