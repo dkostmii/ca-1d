@@ -31,7 +31,7 @@ You can control, how frequently symbols are randomized with `map_frequency` para
 
 You can also provide `r` value for `rule`, `width` and `height` to randomize value with default range (`0-255` or `1-1000`).
 
-Parameter `map_frequently` can be randomized with `r` value too.
+Parameter `map_frequency` can be randomized with `r` value too.
 
 ## Building
 
