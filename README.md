@@ -44,11 +44,16 @@ make clean && make
 Then run:
 
 ```bash
-./build/ca-1d ...your options
+./build/release/ca-1d ...your options
 ```
 
 To build in `debug` mode:
 
 ```bash
 make clean && make debug
+```
+
+Then debug, using GDB:
+```bash
+gdb --args ./build/debug/ca-1d ...your options
 ```
