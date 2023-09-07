@@ -12,7 +12,14 @@ typedef struct _Params {
 	char* map_alive;
 	char* map_dead;
 	int map_frequency;
+	char stdin_char_alive;
+	char stdin_char_dead;
+	int seed_mode;
+	unsigned int seed;
 } Params;
 
+int create_params(Params** result);
+int destroy_params(Params* params);
 int checkout_params(Params* params);
+
 #endif

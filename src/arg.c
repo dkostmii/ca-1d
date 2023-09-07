@@ -2,10 +2,13 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 #include "include/arg.h"
 #include "include/params.h"
 #include "include/math_op.h"
 #include "include/rnd.h"
+#include "include/ca.h"
+#include "include/stdlib_ext.h"
 
 int parse_range(char* arg_value, int* min, int* max) {
 	if (arg_value == NULL) {
@@ -317,6 +320,76 @@ int parse_arg(char* arg, Params* params) {
 		free(name);
 		free(value);
 		return 0;
+	} else if (strcmp(name, "stdin_char_alive") == 0) {
+		if (value_len < 1) {
+			free(name);
+			free(value);
+			return -1;
+		}
+
+		params->stdin_char_alive = value[0];
+		free(name);
+		free(value);
+		return 0;
+	} else if (strcmp(name, "stdin_char_dead") == 0) {
+		if (value_len < 1) {
+			free(name);
+			free(value);
+			return -1;
+		}
+
+		params->stdin_char_dead = value[0];
+		free(name);
+		free(value);
+		return 0;
+	} else if (strcmp(name, "seed_mode") == 0) {
+		if (value_len < 1) {
+			free(name);
+			free(value);
+			return -1;
+		}
+
+		if (strcmp(value, "pulse") == 0) {
+			params->seed_mode = SEED_MODE_PULSE;
+		} else if (strcmp(value, "random") == 0) {
+			params->seed_mode = SEED_MODE_RANDOM;
+		} else if (strcmp(value, "r") == 0) {
+			const int values_len = 2;
+			int values[] = { SEED_MODE_PULSE, SEED_MODE_RANDOM };
+
+			int values_id = range(0, values_len - 1);
+			params->seed_mode = values[values_id];
+		} else {
+			free(name);
+			free(value);
+			return -1;
+		}
+
+		free(name);
+		free(value);
+		return 0;
+	} else if (strcmp(name, "seed") == 0) {
+		if (value_len < 1) {
+			free(name);
+			free(value);
+			return -1;
+		}
+
+		if (strcmp(value, "0") != 0) {
+			unsigned int parsed_value = strtoui(value, NULL, 10);
+
+			if (parsed_value == 0) {
+				free(name);
+				free(value);
+				return -1;
+			}
+
+			params->seed = parsed_value;
+		}
+
+		free(name);
+		free(value);
+		return 0;
 	}
 
 	free(value);
@@ -324,21 +397,112 @@ int parse_arg(char* arg, Params* params) {
 	return -1;
 }
 
-int parse_args(int argc, char** argv, Params* params) {
+int print_usage(char* command, int write_to_stderr) {
+	if (command == NULL) {
+		return -1;
+	}
+
+	if (strlen(command) < 1) {
+		return -1;
+	}
+
 	const int usage_lines_len = 4;
-	const char* usage_lines[] = {
-		"\t%s --help\n",
-		"\t%s --rule=[0-255] --width=[1-1000] --height=[1-1000] --map_alive=C... --map_dead=C... --map_frequency=program|line|cell\n",
-		"\t%s --rule=[0-255,;|...] --width=[1-1000,;|...] --height=[1-1000,;|...] --map_alive=C... --map_dead=C... --map_frequency=program|line|cell\n",
-		"\t%s --rule=r --width=r --height=r --map_alive=C... --map_dead=C... --map_frequency=r\n"
+	char* usage_lines[] = {
+		"--help",
+		"--rule=[0-255] --width=[1-1000] --height=[1-1000] --map_alive=C... --map_dead=C... --map_frequency=program|line|cell --stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=pulse|random",
+		"--rule=[0-255,;|...] --width=[1-1000,;|...] --height=[1-1000,;|...] --map_alive=C... --map_dead=C... --map_frequency=program|line|cell --stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=pulse|random",
+		"--rule=r --width=r --height=r --map_alive=C... --map_dead=C... --map_frequency=r --stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=r"
 	};
 
-	for (int i = 1; i < argc; i++) {
-		if (strncmp(argv[i], "--help", strlen("--help")) == 0) {
-			printf("Usage:\n");
-			for (int i = 0; i < usage_lines_len; i++) {
-				printf(usage_lines[i], argv[0]);
+	printf("Usage:\n");
+	for (int i = 0; i < usage_lines_len; i++) {
+		char prefix[] = "\t%s ";
+		int prefix_len = strlen(prefix);
+		char* usage_line = usage_lines[i];
+		int usage_line_len = strlen(usage_line);
+		int append_suffix = i > 0;
+
+		char* line = (char*) malloc((prefix_len + usage_line_len + 1) * sizeof(char));
+		strcat(line, prefix);
+		strcat(line, usage_line);
+
+		int line_len = strlen(line);
+
+		if (append_suffix == 1) {
+			const char suffix[] = " --seed=0|[1-%u]\n";
+			char* suffix_line = (char*) realloc(line, (line_len + strlen(suffix) + 1) * sizeof(char));
+
+			if (suffix_line == NULL) {
+				free(line);
+				return -1;
 			}
+
+			strcat(line, suffix);
+			if (write_to_stderr == 1) {
+				fprintf(stderr, line, command, UINT_MAX);
+			} else {
+				printf(line, command, UINT_MAX);
+			}
+		} else {
+			const char suffix[] = "\n";
+			char* suffix_line = (char*) realloc(line, (line_len + strlen(suffix) + 1) * sizeof(char));
+
+			if (suffix_line == NULL) {
+				free(line);
+				return -1;
+			}
+
+			strcat(line, suffix);
+			if (write_to_stderr == 1) {
+				fprintf(stderr, line, command);
+			} else {
+				printf(line, command);
+			}
+		}
+		free(line);
+	}
+
+	return 0;
+}
+
+int parse_args(int argc, char** argv, Params* params) {
+	int seed_param_id = -1;
+
+	for (int i = 1; i < argc; i++) {
+		int write_to_stderr = 0;
+		if (strncmp(argv[i], "--seed", strlen("--seed")) == 0) {
+			seed_param_id = i;
+			int parse_arg_res = parse_arg(argv[i], params);
+
+			if (parse_arg_res < 0) {
+				fprintf(stderr, "Invalid arg: %s\n", argv[i]);
+				write_to_stderr = 1;
+				int print_usage_res = print_usage(argv[0], write_to_stderr);
+				if (print_usage_res < 0) {
+					return -1;
+				}
+
+				return -1;
+			}
+		}
+	}
+
+	// FIXME: This should be separated from arg logic
+	srand(params->seed);
+
+	for (int i = 1; i < argc; i++) {
+		if (seed_param_id != -1 && i == seed_param_id) {
+			continue;
+		}
+
+		int write_to_stderr = 0;
+		if (strncmp(argv[i], "--help", strlen("--help")) == 0) {
+			int print_usage_res = print_usage(argv[0], write_to_stderr);
+
+			if (print_usage_res < 0) {
+				return -1;
+			}
+
 			return 1;
 		}
 
@@ -346,10 +510,13 @@ int parse_args(int argc, char** argv, Params* params) {
 
 		if (parse_arg_res < 0) {
 			fprintf(stderr, "Invalid arg: %s\n", argv[i]);
-			fprintf(stderr, "Usage:\n");
-			for (int i = 0; i < usage_lines_len; i++) {
-				fprintf(stderr, usage_lines[i], argv[0]);
+			write_to_stderr = 1;
+			int print_usage_res = print_usage(argv[0], write_to_stderr);
+
+			if (print_usage_res < 0) {
+				return -1;
 			}
+
 			return -1;
 		}
 	}

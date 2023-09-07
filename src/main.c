@@ -1,78 +1,21 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
-#include <time.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include "include/ca.h"
 #include "include/ca_io.h"
 #include "include/params.h"
 #include "include/arg.h"
-
-int create_params(Params** result) {
-	if (result == NULL) {
-		return -1;
-	}
-
-	if (*result != NULL) {
-		return -1;
-	}
-
-	*result = (Params*) malloc(sizeof(Params));
-
-	if (result == NULL) {
-		return -1;
-	}
-
-	(*result)->rule = 90;
-	(*result)->height = 10;
-	(*result)->width = 11;
-	(*result)->map_frequency = MAP_FREQ_PROGRAM;
-
-	(*result)->map_alive = (char*) malloc(2 * sizeof(char));
-
-	if ((*result)->map_alive == NULL) {
-		free(result);
-		return -1;
-	}
-
-	(*result)->map_dead = (char*) malloc(2 * sizeof(char));
-
-	if ((*result)->map_dead == NULL) {
-		free((*result)->map_dead);
-		free(*result);
-		return -1;
-	}
-
-	strcpy((*result)->map_alive, "X");
-	strcpy((*result)->map_dead, " ");
-	(*result)->map_alive[1] = '\0';
-	(*result)->map_dead[1] = '\0';
-
-	return 0;
-}
-
-int destroy_params(Params* params) {
-	if (params == NULL) {
-		return -1;
-	}
-
-	if (params->map_alive != NULL) {
-		free(params->map_alive);
-	}
-
-	if (params->map_dead != NULL) {
-		free(params->map_dead);
-	}
-
-	free(params);
-	return 0;
-}
+#include "include/parse.h"
 
 int main(int argc, char** argv) {
 	Params* params = NULL;
 	create_params(&params);
 
-	if (argc > 0) {
-		srand(time(NULL));
+	if (argc > 1) {
+		// NOTE: srand(params->seed) call insied parse_args
 		int parse_res = parse_args(argc, argv, params);
 
 		if (parse_res < 0) {
@@ -94,24 +37,100 @@ int main(int argc, char** argv) {
 	}
 
 	int** states = (int**) malloc(params->height * sizeof(int*));
-	states[0] = (int*) malloc(params->width * sizeof(int));
 
-	if (states[0] == NULL) {
+	int stdin_fileno = fileno(stdin);
+	int is_atty_res = isatty(stdin_fileno) == 0;
+	struct stat stats;
+
+	int fstat_res = fstat(stdin_fileno, &stats);
+
+	if (fstat_res < 0) {
 		free(states);
 		destroy_params(params);
 		return -1;
 	}
 
-	int seed_res = seed_state(&states[0], params->width);
+	int has_input = !S_ISCHR(stats.st_mode);
+	int mode_is_valid = !has_input || S_ISREG(stats.st_mode) || S_ISFIFO(stats.st_mode);
 
-	if (seed_res < 0 && states[0] != NULL) {
-		free(states[0]);
-	}
-
-	if (seed_res < 0) {
+	if (mode_is_valid == 0) {
 		free(states);
 		destroy_params(params);
 		return -1;
+	}
+
+	int parser_empty = 0;
+
+	if (is_atty_res && has_input) {
+		char* input_pipe = (char*) malloc((params->width + 1) * sizeof(char));
+
+		if (input_pipe == NULL) {
+			free(states);
+			destroy_params(params);
+			return -1;
+		}
+
+		char* fgets_res = fgets(input_pipe, params->width + 1, stdin);
+
+		if (fgets_res == NULL) {
+			free(input_pipe);
+			free(states);
+			destroy_params(params);
+			return -1;
+		}
+
+		int* seed_state = NULL;
+
+		int parse_state_str_res = parse_state_str(
+			input_pipe,
+			&seed_state,
+			params->width,
+			params->stdin_char_alive,
+			params->stdin_char_dead
+		);
+
+		if (parse_state_str_res < 0) {
+			free(input_pipe);
+			free(states);
+			destroy_params(params);
+			return -1;
+		}
+
+		if (parse_state_str_res == 1) {
+			parser_empty = 1;
+		}
+
+		if (parser_empty == 0) {
+			if (states[0] != NULL) {
+				free(states[0]);
+			}
+
+			states[0] = seed_state;
+		}
+
+		free(input_pipe);
+	}
+
+	if (is_atty_res == 0 || has_input == 0 || parser_empty == 1) {
+		states[0] = (int*) malloc(params->width * sizeof(int));
+
+		if (states[0] == NULL) {
+			free(states);
+			destroy_params(params);
+			return -1;
+		}
+
+		int seed_res = seed_state(&states[0], params->width, params->seed_mode);
+
+		if (seed_res < 0 && states[0] != NULL) {
+			free(states[0]);
+		}
+
+		if (seed_res < 0) {
+			free(states);
+			destroy_params(params);
+			return -1;
+		}
 	}
 
 	for (int i = 1; i < params->height; i++) {

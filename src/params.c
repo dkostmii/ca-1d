@@ -1,12 +1,80 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+#include <time.h>
 #include "include/params.h"
 #include "include/rnd.h"
+#include "include/ca.h"
 
 const int MAP_FREQ_PROGRAM = 0;
 const int MAP_FREQ_LINE = 1;
 const int MAP_FREQ_CELL = 2;
+
+int create_params(Params** result) {
+	if (result == NULL) {
+		return -1;
+	}
+
+	if (*result != NULL) {
+		return -1;
+	}
+
+	*result = (Params*) malloc(sizeof(Params));
+
+	if (result == NULL) {
+		return -1;
+	}
+
+	(*result)->rule = 90;
+	(*result)->height = 10;
+	(*result)->width = 11;
+	(*result)->map_frequency = MAP_FREQ_PROGRAM;
+
+	(*result)->map_alive = (char*) malloc(2 * sizeof(char));
+
+	if ((*result)->map_alive == NULL) {
+		free(result);
+		return -1;
+	}
+
+	(*result)->map_dead = (char*) malloc(2 * sizeof(char));
+
+	if ((*result)->map_dead == NULL) {
+		free((*result)->map_dead);
+		free(*result);
+		return -1;
+	}
+
+	strcpy((*result)->map_alive, "X");
+	strcpy((*result)->map_dead, " ");
+	(*result)->map_alive[1] = '\0';
+	(*result)->map_dead[1] = '\0';
+
+	(*result)->stdin_char_alive = '1';
+	(*result)->stdin_char_dead = '0';
+
+	(*result)->seed_mode = SEED_MODE_PULSE;
+	(*result)->seed = time(NULL);
+
+	return 0;
+}
+
+int destroy_params(Params* params) {
+	if (params == NULL) {
+		return -1;
+	}
+
+	if (params->map_alive != NULL) {
+		free(params->map_alive);
+	}
+
+	if (params->map_dead != NULL) {
+		free(params->map_dead);
+	}
+
+	free(params);
+	return 0;
+}
 
 int checkout_params(Params* params) {
 	if (params == NULL) {
