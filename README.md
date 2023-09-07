@@ -24,6 +24,10 @@ To conveniently run `ca-1d`, I wrapped invocation with all parameters in bash sc
         --seed=$(date +%s%3N)
 ```
 
+> **Hint**
+> Use `systemlist()` Vim function to get list of lines with `ca-1d` result and
+> `append()` to append each line into buffer of welcome screen.
+
 ## Usage
 
 Control display by providing parameters:
