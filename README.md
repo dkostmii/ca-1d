@@ -4,9 +4,25 @@ Elementary cellular automata CLI, written in C.
 
 ## Idea for usage
 
-I use this Vim welcome screen art:
+I use this Vim welcome screen art (using sophisticated vim script from [here](https://vi.stackexchange.com/questions/627/how-can-i-change-vims-start-or-intro-screen)):
 
 ![Idea for usage](./img/idea.png)
+
+To conveniently run `ca-1d`, I wrapped invocation with all parameters in bash script:
+
+```bash
+#!/bin/bash
+
+~/Projects/ca-1d/build/release/ca-1d \
+        --rule=110,22,108,30,218,45,18,24,54,184,90,126,250,150,66,99,182 \
+        --width=31-80 \
+        --height=16-22 \
+        --map_alive=@\K\&\%\#\*\?\$\=MW\>86RBE3~xdVN\< \
+        --map_dead=e\ i\:\;\"\'\`\/\\\ .\,\|_\-qojs \
+        --map_frequency=r \
+        --seed_mode=r \
+        --seed=$(date +%s%3N)
+```
 
 ## Usage
 
