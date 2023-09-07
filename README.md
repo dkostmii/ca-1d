@@ -32,8 +32,7 @@ Control display by providing parameters:
 Usage:
         ./build/release/ca-1d --help
         ./build/release/ca-1d --rule=[0-255] --width=[1-1000] --height=[1-1000] --map_alive=C... --map_dead=C... --map_frequency=program|line|cell -stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=pulse|random --seed=0|[1-4294967295]
-        ./build/release/ca-1d --rule=[0-255,;|...] --width=[1-1000,;|...] --height=[1-1000,;|...] --map_alive=C... --map_dead=C... --map_frequency=program|line|cell --stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=p
-ulse|random --seed=0|[1-4294967295]
+        ./build/release/ca-1d --rule=[0-255,;|...] --width=[1-1000,;|...] --height=[1-1000,;|...] --map_alive=C... --map_dead=C... --map_frequency=program|line|cell --stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=pulse|random --seed=0|[1-4294967295]
         ./build/release/ca-1d --rule=r --width=r --height=r --map_alive=C... --map_dead=C... --map_frequency=r --stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=r --seed=0|[1-4294967295]
 ```
 
