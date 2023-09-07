@@ -34,8 +34,8 @@ int print_state(int* state, Params params) {
 		id = range(0, map_alive_len - 1);
 	}
 
-	map[0] = params.map_alive[id];
-	map[1] = params.map_dead[id];
+	map[0] = params.map_dead[id];
+	map[1] = params.map_alive[id];
 	map[2] = '\0';
 
 	for (int i = 0; i < params.width; i++) {
