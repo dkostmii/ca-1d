@@ -59,7 +59,7 @@ General syntax for parameters is `--param=value`.
 |Parameter         |Value type|Possible values           |Examples|Default value|
 |------------------|----------|--------------------------------|----------------------------------------------------------------------------|---------------------------------------------|
 |`rule`            |number    |single, range, list or `r`      |`--rule=45`<br>`--rule=30-45`<br>`--rule=30,45;90\|110`<br>`--rule=r`       |`90`                                         |
-|`width`           |number    |single, range, list or `r`      |`--width=20`<bt>`--width=20-40`<br>`--width=20,30;40\|50`<br>`--width=r`    |`11`                                         |
+|`width`           |number    |single, range, list or `r`      |`--width=20`<br>`--width=20-40`<br>`--width=20,30;40\|50`<br>`--width=r`    |`11`                                         |
 |`height`          |number    |single, range, list or `r`      |`--height=10`<br>`--height=10-20`<br>`--height=10,20;30\|40`<br>`--height=r`|`10`                                         |
 |`map_alive`       |string    |single                          |`--map_alive=X`<br>`--map_alive=XYZ`                                        |`X`                                          |
 |`map_dead`        |string    |single                          |`--map_alive=X`<br>`--map_alive=XYZ`                                        |Space character                              |
