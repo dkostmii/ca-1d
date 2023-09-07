@@ -28,7 +28,7 @@ To conveniently run `ca-1d`, I wrapped invocation with all parameters in bash sc
 
 Control display by providing parameters:
 
-```bash
+```text
 Usage:
         ./build/release/ca-1d --help
         ./build/release/ca-1d --rule=[0-255] --width=[1-1000] --height=[1-1000] --map_alive=C... --map_dead=C... --map_frequency=program|line|cell -stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=pulse|random --seed=0|[1-4294967295]
@@ -62,10 +62,10 @@ General syntax for parameters is `--param=value`.
 |`width`           |number    |single, range, list or `r`      |`--width=20`<br>`--width=20-40`<br>`--width=20,30;40\|50`<br>`--width=r`    |`11`                                         |
 |`height`          |number    |single, range, list or `r`      |`--height=10`<br>`--height=10-20`<br>`--height=10,20;30\|40`<br>`--height=r`|`10`                                         |
 |`map_alive`       |string    |single                          |`--map_alive=X`<br>`--map_alive=XYZ`                                        |`X`                                          |
-|`map_dead`        |string    |single                          |`--map_alive=X`<br>`--map_alive=XYZ`                                        |Space character                              |
+|`map_dead`        |string    |single                          |`--map_dead=\ `<br>`--map_dead=\ _.`                                        |Space character                              |
 |`map_frequency`   |string    |`program`, `line`, `cell` or `r`|`--map_frequency=line`<br>`--map_frequency=r`                         |`program`                                    |
 |`stdin_char_alive`|char      |single                          |`--stdin_char_alive=X`                                                      |`1`                                          |
-|`stdin_char_dead` |char      |single                          |`--stdin_char_alive=_`                                                      |`0`                                          |
+|`stdin_char_dead` |char      |single                          |`--stdin_char_dead=_`                                                      |`0`                                          |
 |`seed_mode`       |string    |`pulse`, `random` or `r`        |`--seed_mode=random`<br>`--seed_mode=r`                                     |`pulse`                                      |
 |`seed`            |number    |single                          |`--seed=0`<br>`--seed=1234`                                                 |`0` is replaced by `time(NULL)` from `time.h`|
 |`help`            |&ndash;   |&ndash;                         |`--help`                                                                    |&ndash;                                      |
@@ -87,7 +87,8 @@ separated with either `,`, `;` or `|`. Separators can be combined.
 possible values for string type parameters. Parameters that accept this value
 are listed in [Usage](#usage)
 - upper bound for `seed` parameter may differ, depending on your system and
-compiler implementation. Always run `ca-1d --help` to check `seed` range
+compiler implementation (it is `UINT_MAX` value from `limits.h`).
+Always run `ca-1d --help` to check `seed` range
 - `seed` parameter value is truncated to its range, this means it will not
 return error for greater values, but **it will error on negative value.**
 This can be used to give more entropy on short intervals, for example:
