@@ -4,6 +4,9 @@ Elementary cellular automata CLI, written in C.
 
 ## Idea for usage
 
+> **Updated**
+> Examples can be found in `examples/` dir.
+
 I use this Vim welcome screen art (using sophisticated vim script from [here](https://vi.stackexchange.com/questions/627/how-can-i-change-vims-start-or-intro-screen)):
 
 ![Idea for usage](./img/idea.png)
