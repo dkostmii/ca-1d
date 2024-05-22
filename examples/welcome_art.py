@@ -3,6 +3,28 @@ from random import randint, seed
 import sys
 import subprocess
 
+from colored import Fore, Style
+
+class PaletteItem:
+    pattern: str
+
+    def __init__(self, color, pattern: str):
+        self.color = color
+        self.pattern = pattern
+
+    def apply(self, text: str):
+        return f"{self.color}{text}{Style.reset}"
+
+
+palette = list(map(lambda item: PaletteItem(*item), [
+    [Fore.blue, "@K&%#*?$"],
+    [Fore.magenta, "MW>86RBE"],
+    [Fore.green, "=3~xdVN<"],
+    [Fore.light_blue, ":;\"'`"],
+    [Fore.light_magenta, "qojsei"],
+    [Fore.light_green, "/.,|_-"]
+]))
+
 bin_path = "ca-1d"
 
 unix_epoch_millis = int(time() * 1000)
@@ -16,12 +38,15 @@ height_factor = 4
 scaled_height_range = [ height_factor * value for value in height_range ]
 
 width = "31-80"
+use_color = False
 
 if len(sys.argv) > 1:
     try:
         width = str(int(sys.argv[1]))
     except ValueError:
         pass
+
+    use_color = any(filter(lambda arg: arg == "-c" or arg == "--color", sys.argv))
 
 command = [
     bin_path,
@@ -65,9 +90,17 @@ def main():
     output_lines = command_output.split('\n')
     slice = get_vertical_slice(output_lines)
     slice = shift_horiz(slice)
+    text = "\n".join(slice)
 
-    for line in slice:
-        print(line)
+    result = ""
+    for ch in text:
+        pal_item = next(filter(lambda pi: ch in pi.pattern, palette), None)
+        if use_color and pal_item:
+            result += f"{Style.reset}{pal_item.color}"
+
+        result += ch
+
+    print(result)
 
 
 if __name__ == "__main__":
