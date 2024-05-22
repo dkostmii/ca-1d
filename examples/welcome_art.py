@@ -14,10 +14,18 @@ height_range = [16, 22]
 height_factor = 4
 scaled_height_range = [ height_factor * value for value in height_range ]
 
+width = "31-80"
+
+if len(sys.argv) > 1:
+    try:
+        width = str(int(sys.argv[1]))
+    except ValueError:
+        pass
+
 command = [
     bin_path,
     "--rule=110,22,108,30,218,45,18,24,54,184,90,126,250,150,66,99,182",
-    "--width=31-80",
+    f"--width={width}",
     f"--height={scaled_height_range[0]}-{scaled_height_range[1]}",
     r"--map_alive=@K\&\%\#\*\?\$\=MW\>86RBE3~xdVN\<",
     r"--map_dead=e\ i\:\;\"\'\`\/\\\ .\,\|_-qojs",
