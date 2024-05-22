@@ -62,8 +62,17 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
+install: all
+	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
+	@mkdir -p ${DESTDIR}${PREFIX}/bin
+	@cp -f ${BUILD_DIR}/${TARGET_EXEC} ${DESTDIR}${PREFIX}/bin
+	@chmod 755 ${DESTDIR}${PREFIX}/bin/${TARGET_EXEC}
 
-.PHONY: clean
+uninstall:
+	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
+	$(RM) ${DESTDIR}${PREFIX}/bin/${TARGET_EXEC}
+
+.PHONY: clean install uninstall
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf $(DBG_DIR)

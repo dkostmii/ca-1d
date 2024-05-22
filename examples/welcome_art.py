@@ -1,8 +1,9 @@
 from time import time
 from random import randint, seed
+import sys
 import subprocess
 
-bin_path = "~/Projects/ca-1d/build/release/ca-1d"
+bin_path = "ca-1d"
 
 unix_epoch_millis = int(time() * 1000)
 

@@ -16,7 +16,7 @@ To conveniently run `ca-1d`, I wrapped invocation with all parameters in bash sc
 ```bash
 #!/bin/bash
 
-~/Projects/ca-1d/build/release/ca-1d \
+ca-1d \
         --rule=110,22,108,30,218,45,18,24,54,184,90,126,250,150,66,99,182 \
         --width=31-80 \
         --height=16-22 \
@@ -105,6 +105,26 @@ This can be used to give more entropy on short intervals, for example:
 
     which gets amount of milliseconds since UNIX epoch, so that
     seed does not repeat until approximately 50 days.
+
+## Installing
+
+This installs binary to system:
+
+```bash
+sudo make clean install
+```
+
+Now, you can run:
+
+```bash
+ca-1d ...your options
+```
+
+To uninstall run:
+
+```bash
+sudo make uninstall
+```
 
 ## Building
 
