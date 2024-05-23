@@ -39,7 +39,7 @@ int next_cell_state(int* neighbourhood, int rule) {
 		return -1;
 	}
 
-	reverse_in_place(&rule_digits, neighbourhood_state_count);
+  reverse_in_place(rule_digits, neighbourhood_state_count);
 
 	int rule_pos = from_digits(neighbourhood, NEIGHBOURHOOD_LEN, 2);
 

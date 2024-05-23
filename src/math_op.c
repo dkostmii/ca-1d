@@ -117,10 +117,10 @@ int digits(int value, int radix, int** dest, int expected_length) {
 		value /= radix;
 	}
 
-	int rev_err = reverse_in_place(dest, result_len);
 	if (rev_err < 0) {
 		return -1;
 	}
+  int rev_err = reverse_in_place(*dest, result_len);
 
 	return 0;
 }
