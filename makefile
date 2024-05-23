@@ -62,6 +62,9 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
+format:
+	find -iname "*.c" -o -iname "*.cc" -o -iname "*.cpp" -o -iname "*.cxx" -o -iname "*.h" -o -iname "*.hpp" | xargs clang-format -i --style=file
+
 install: all
 	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
@@ -72,7 +75,7 @@ uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
 	$(RM) ${DESTDIR}${PREFIX}/bin/${TARGET_EXEC}
 
-.PHONY: clean install uninstall
+.PHONY: clean install uninstall format
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf $(DBG_DIR)
