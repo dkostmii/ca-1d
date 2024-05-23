@@ -255,7 +255,7 @@ parse_arg (char *arg, Params *params)
     {
       int result = 0;
 
-      if (strcmp (value, "inf") != 0)
+      if (strncmp (value, "inf", strlen ("inf")) != 0)
         {
           int parse_int_arg_res = parse_int_arg (value, &result, 1, 1000);
 
