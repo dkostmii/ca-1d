@@ -1,9 +1,13 @@
-from time import time
-from random import randint, seed
-import sys
 import subprocess
+import sys
+from random import randint, seed
+from time import time
 
 from colored import Fore, Style
+
+# provide --help or -h param for usage
+# example: python welcome_art.py --help
+
 
 class PaletteItem:
     pattern: str
@@ -16,14 +20,19 @@ class PaletteItem:
         return f"{self.color}{text}{Style.reset}"
 
 
-palette = list(map(lambda item: PaletteItem(*item), [
-    [Fore.blue, "@K&%#*?$"],
-    [Fore.magenta, "MW>86RBE"],
-    [Fore.green, "=3~xdVN<"],
-    [Fore.light_blue, ":;\"'`"],
-    [Fore.light_magenta, "qojsei"],
-    [Fore.light_green, "/.,|_-"]
-]))
+palette = list(
+    map(
+        lambda item: PaletteItem(*item),
+        [
+            [Fore.blue, "@K&%#*?$"],
+            [Fore.magenta, "MW>86RBE"],
+            [Fore.green, "=3~xdVN<"],
+            [Fore.light_blue, ":;\"'`"],
+            [Fore.light_magenta, "qojsei"],
+            [Fore.light_green, "/.,|_-"],
+        ],
+    )
+)
 
 bin_path = "ca-1d"
 
@@ -35,18 +44,50 @@ seed(unix_epoch_millis)
 
 height_range = [16, 22]
 height_factor = 4
-scaled_height_range = [ height_factor * value for value in height_range ]
+scaled_height_range = [height_factor * value for value in height_range]
 
-width = "31-80"
+default_width = "31-80"
+width = default_width
 use_color = False
+help = False
+
+
+def print_usage():
+    print("Usage:")
+    print(f"    python welcome_art.py [width={default_width}] [-c|--color] [-h|--help]")
+
 
 if len(sys.argv) > 1:
-    try:
-        width = str(int(sys.argv[1]))
-    except ValueError:
-        pass
+    args = sys.argv.copy()
 
-    use_color = any(filter(lambda arg: arg == "-c" or arg == "--color", sys.argv))
+    prev_args_len = len(args)
+    args = list(filter(lambda arg: arg != "-c" and arg != "--color", args))
+    next_args_len = len(args)
+
+    use_color = prev_args_len != next_args_len
+
+    prev_args_len = next_args_len
+    args = list(filter(lambda arg: arg != "-h" and arg != "--help", args))
+    next_args_len = len(args)
+
+    help = prev_args_len != next_args_len
+
+    if next_args_len > 1:
+        try:
+            arg_width = args[1]
+
+            if arg_width:
+                width = str(int(arg_width))
+
+        except ValueError:
+            print(f"Invalid width value: {args[1]}")
+            print_usage()
+            sys.exit(1)
+
+if help:
+    print_usage()
+    sys.exit(0)
+
 
 command = [
     bin_path,
@@ -57,10 +98,11 @@ command = [
     r"--map_dead=e\ i\:\;\"\'\`\/\\\ .\,\|_-qojs",
     "--map_frequency=r",
     "--seed_mode=r",
-    f"--seed={unix_epoch_millis}"
+    f"--seed={unix_epoch_millis}",
 ]
 
 command = " ".join(command)
+
 
 def rotate(string: str, amount: int) -> str:
     return string[-amount:] + string[:-amount]
@@ -86,8 +128,10 @@ def get_vertical_slice(lines: list[str]) -> list[str]:
 
 
 def main():
-    command_output = subprocess.check_output(command, text=True, encoding='utf-8', shell=True)
-    output_lines = command_output.split('\n')
+    command_output = subprocess.check_output(
+        command, text=True, encoding="utf-8", shell=True
+    )
+    output_lines = command_output.split("\n")
     slice = get_vertical_slice(output_lines)
     slice = shift_horiz(slice)
     text = "\n".join(slice)
