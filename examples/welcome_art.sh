@@ -6,6 +6,5 @@ ca-1d \
 	--height=16-22 \
 	--map_alive=@K\&\%\#\*\?\$\=MW\>86RBE3~xdVN\< \
 	--map_dead=e\ i\:\;\"\'\`\/\\\ .\,\|_-qojs \
-	--map_frequency=r \
 	--seed_mode=r \
 	--seed=$(date +%s%3N)

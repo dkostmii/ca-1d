@@ -1,7 +1,7 @@
 import subprocess
 import sys
 from random import randint, seed
-from time import time
+from time import sleep, time
 
 from colored import Fore, Style
 
@@ -43,6 +43,7 @@ unix_epoch_millis = int(time() * 1000)
 seed(unix_epoch_millis)
 
 height_range = [16, 22]
+height = None
 height_factor = 4
 scaled_height_range = [height_factor * value for value in height_range]
 
@@ -50,11 +51,14 @@ default_width = "31-80"
 width = default_width
 use_color = False
 help = False
+animate = False
 
 
 def print_usage():
     print("Usage:")
-    print(f"    python welcome_art.py [width={default_width}] [-c|--color] [-h|--help]")
+    print(
+        f"    python welcome_art.py [width={default_width}] [height={height_range[0]}-{height_range[1]}|inf] [-c|--color] [-h|--help] [-a|--animate]"
+    )
 
 
 if len(sys.argv) > 1:
@@ -72,6 +76,12 @@ if len(sys.argv) > 1:
 
     help = prev_args_len != next_args_len
 
+    prev_args_len = next_args_len
+    args = list(filter(lambda arg: arg != "-a" and arg != "--animate", args))
+    next_args_len = len(args)
+
+    animate = prev_args_len != next_args_len
+
     if next_args_len > 1:
         try:
             arg_width = args[1]
@@ -84,6 +94,20 @@ if len(sys.argv) > 1:
             print_usage()
             sys.exit(1)
 
+    if next_args_len > 2:
+        try:
+            arg_height = args[2]
+
+            if arg_height and arg_height != "inf":
+                height = str(int(arg_height))
+            elif arg_height == "inf":
+                height = arg_height
+
+        except ValueError:
+            print(f"Invalid height value: {args[2]}")
+            print_usage()
+            sys.exit(1)
+
 if help:
     print_usage()
     sys.exit(0)
@@ -92,11 +116,14 @@ if help:
 command = [
     bin_path,
     "--rule=110,22,108,30,218,45,18,24,54,184,90,126,250,150,66,99,182",
-    f"--width={width}",
-    f"--height={scaled_height_range[0]}-{scaled_height_range[1]}",
+    f"--width={width}" if not animate else "--width=inf",
+    (
+        f"--height={scaled_height_range[0]}-{scaled_height_range[1]}"
+        if height is None
+        else f"--height={height}"
+    ),
     r"--map_alive=@K\&\%\#\*\?\$\=MW\>86RBE3~xdVN\<",
     r"--map_dead=e\ i\:\;\"\'\`\/\\\ .\,\|_-qojs",
-    "--map_frequency=r",
     "--seed_mode=r",
     f"--seed={unix_epoch_millis}",
 ]
@@ -128,6 +155,43 @@ def get_vertical_slice(lines: list[str]) -> list[str]:
 
 
 def main():
+    if animate:
+        proc = subprocess.Popen(
+            [
+                "ca-1d",
+                "--height=50",
+                "--map_alive=#",
+                "--map_dead=o",
+                f"--width={width}",
+                (
+                    f"--height={height_range[0]}-{height_range[1]}"
+                    if height is None
+                    else f"--height={height}"
+                ),
+            ],
+            encoding="utf-8",
+            stdout=subprocess.PIPE,
+        )
+        stdout_end = False
+
+        while not stdout_end:
+            line = proc.stdout.readline()
+            stdout_end = len(line) == 0
+            result = ""
+
+            if not stdout_end:
+                for ch in line:
+                    pal_item = next(filter(lambda pi: ch in pi.pattern, palette), None)
+                    if use_color and pal_item:
+                        result += f"{Style.reset}{pal_item.color}"
+
+                    result += ch
+                result = result.replace("\n", "")
+                print(f"\r{result}", end="")
+                sleep(0.1)
+
+        return
+
     command_output = subprocess.check_output(
         command, text=True, encoding="utf-8", shell=True
     )
