@@ -254,20 +254,24 @@ parse_arg (char *arg, Params *params)
   else if (strcmp (name, "height") == 0)
     {
       int result = 0;
-      int parse_int_arg_res = parse_int_arg (value, &result, 1, 1000);
 
-      if (parse_int_arg_res < 0)
+      if (strcmp (value, "inf") != 0)
         {
-          free (name);
-          free (value);
-          return -1;
-        }
+          int parse_int_arg_res = parse_int_arg (value, &result, 1, 1000);
 
-      if (parse_int_arg_res > 1)
-        {
-          free (name);
-          free (value);
-          return 0;
+          if (parse_int_arg_res < 0)
+            {
+              free (name);
+              free (value);
+              return -1;
+            }
+
+          if (parse_int_arg_res > 1)
+            {
+              free (name);
+              free (value);
+              return 0;
+            }
         }
 
       params->height = result;
@@ -299,46 +303,6 @@ parse_arg (char *arg, Params *params)
       free (value);
       return 0;
     }
-  else if (strcmp (name, "map_frequency") == 0)
-    {
-      if (value_len < 1)
-        {
-          free (name);
-          free (value);
-          return -1;
-        }
-
-      if (strcmp (value, "program") == 0)
-        {
-          params->map_frequency = MAP_FREQ_PROGRAM;
-        }
-      else if (strcmp (value, "line") == 0)
-        {
-          params->map_frequency = MAP_FREQ_LINE;
-        }
-      else if (strcmp (value, "cell") == 0)
-        {
-          params->map_frequency = MAP_FREQ_CELL;
-        }
-      else if (strcmp (value, "r") == 0)
-        {
-          const int values_len = 3;
-          int values[] = { MAP_FREQ_PROGRAM, MAP_FREQ_LINE, MAP_FREQ_CELL };
-
-          int values_id = range (0, values_len - 1);
-          params->map_frequency = values[values_id];
-        }
-      else
-        {
-          free (name);
-          free (value);
-          return -1;
-        }
-
-      free (name);
-      free (value);
-      return 0;
-    }
   else if (strcmp (name, "map_alive") == 0)
     {
       if (value_len < 1)
@@ -348,14 +312,7 @@ parse_arg (char *arg, Params *params)
           return -1;
         }
 
-      if (params->map_alive != NULL)
-        {
-          free (params->map_alive);
-        }
-
-      params->map_alive = (char *)malloc ((value_len + 1) * sizeof (char));
-      strcpy (params->map_alive, value);
-      params->map_alive[value_len] = '\0';
+      params->map_alive = value[0];
 
       free (name);
       free (value);
@@ -370,14 +327,7 @@ parse_arg (char *arg, Params *params)
           return -1;
         }
 
-      if (params->map_dead != NULL)
-        {
-          free (params->map_dead);
-        }
-
-      params->map_dead = (char *)malloc ((value_len + 1) * sizeof (char));
-      strcpy (params->map_dead, value);
-      params->map_dead[value_len] = '\0';
+      params->map_dead = value[0];
 
       free (name);
       free (value);
@@ -496,14 +446,14 @@ print_usage (char *command, int write_to_stderr)
   const int usage_lines_len = 4;
   char *usage_lines[] = {
     "--help",
-    "--rule=[0-255] --width=[1-1000] --height=[1-1000] --map_alive=C... "
-    "--map_dead=C... --map_frequency=program|line|cell --stdin_char_alive=1 "
+    "--rule=[0-255] --width=[1-1000] --height=[1-1000] --map_alive=C "
+    "--map_dead=C --stdin_char_alive=1 "
     "--stdin_char_dead=0 --seed_mode=pulse|random",
     "--rule=[0-255,;|...] --width=[1-1000,;|...] --height=[1-1000,;|...] "
-    "--map_alive=C... --map_dead=C... --map_frequency=program|line|cell "
+    "--map_alive=C --map_dead=C "
     "--stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=pulse|random",
-    "--rule=r --width=r --height=r --map_alive=C... --map_dead=C... "
-    "--map_frequency=r --stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=r"
+    "--rule=r --width=r --height=r --map_alive=C --map_dead=C "
+    "--stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=r"
   };
 
   printf ("Usage:\n");
