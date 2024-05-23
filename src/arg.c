@@ -456,17 +456,30 @@ print_usage (char *command, int write_to_stderr)
     "--stdin_char_alive=1 --stdin_char_dead=0 --seed_mode=r"
   };
 
+  char prefix[] = "\t%s ";
+  int prefix_len = strlen (prefix);
+
   printf ("Usage:\n");
   for (int i = 0; i < usage_lines_len; i++)
     {
-      char prefix[] = "\t%s ";
-      int prefix_len = strlen (prefix);
       char *usage_line = usage_lines[i];
       int usage_line_len = strlen (usage_line);
       int append_suffix = i > 0;
 
-      char *line
-          = (char *)malloc ((prefix_len + usage_line_len + 1) * sizeof (char));
+      char *line;
+      char *suffix;
+
+      if (append_suffix == 1)
+        {
+          asprintf (&suffix, " --seed=0|[1-%u]\n", UINT_MAX);
+        }
+      else
+        {
+          asprintf (&suffix, "\n");
+        }
+
+      line = (char *)malloc (
+          (prefix_len + usage_line_len + strlen (suffix) + 1) * sizeof (char));
 
       if (line == NULL)
         {
@@ -475,55 +488,19 @@ print_usage (char *command, int write_to_stderr)
 
       strcpy (line, prefix);
       strcat (line, usage_line);
+      strcat (line, suffix);
 
-      int line_len = strlen (line);
+      free (suffix);
 
-      if (append_suffix == 1)
+      if (write_to_stderr == 1)
         {
-          const char suffix[] = " --seed=0|[1-%u]\n";
-          char *suffix_line = (char *)realloc (
-              line, (line_len + strlen (suffix) + 1) * sizeof (char));
-
-          if (suffix_line == NULL)
-            {
-              free (line);
-              return -1;
-            }
-          line = suffix_line;
-
-          strcat (line, suffix);
-          if (write_to_stderr == 1)
-            {
-              fprintf (stderr, line, command, UINT_MAX);
-            }
-          else
-            {
-              printf (line, command, UINT_MAX);
-            }
+          fprintf (stderr, line, command);
         }
       else
         {
-          const char suffix[] = "\n";
-          char *suffix_line = (char *)realloc (
-              line, (line_len + strlen (suffix) + 1) * sizeof (char));
-
-          if (suffix_line == NULL)
-            {
-              free (line);
-              return -1;
-            }
-          line = suffix_line;
-
-          strcat (line, suffix);
-          if (write_to_stderr == 1)
-            {
-              fprintf (stderr, line, command);
-            }
-          else
-            {
-              printf (line, command);
-            }
+          printf (line, command);
         }
+
       free (line);
     }
 
