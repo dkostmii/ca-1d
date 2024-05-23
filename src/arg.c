@@ -467,7 +467,13 @@ print_usage (char *command, int write_to_stderr)
 
       char *line
           = (char *)malloc ((prefix_len + usage_line_len + 1) * sizeof (char));
-      strcat (line, prefix);
+
+      if (line == NULL)
+        {
+          return -1;
+        }
+
+      strcpy (line, prefix);
       strcat (line, usage_line);
 
       int line_len = strlen (line);
@@ -483,6 +489,7 @@ print_usage (char *command, int write_to_stderr)
               free (line);
               return -1;
             }
+          line = suffix_line;
 
           strcat (line, suffix);
           if (write_to_stderr == 1)
@@ -505,6 +512,7 @@ print_usage (char *command, int write_to_stderr)
               free (line);
               return -1;
             }
+          line = suffix_line;
 
           strcat (line, suffix);
           if (write_to_stderr == 1)
