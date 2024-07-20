@@ -176,7 +176,7 @@ if help:
 command = [
     bin_path,
     "--rule=110,22,108,30,218,45,18,24,54,184,90,126,250,150,66,99,182",
-    f"--width={width}" if not animate else "--width=inf",
+    f"--width={width}",
     (
         f"--height={scaled_height_range[0]}-{scaled_height_range[1]}"
         if height is None
