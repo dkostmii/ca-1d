@@ -2,6 +2,7 @@ import subprocess
 import sys
 from random import randint, seed, choice
 from time import sleep, time
+from os import system
 
 from colored import Fore, Style
 
