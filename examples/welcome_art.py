@@ -28,7 +28,7 @@ palette = list(
             [Fore.blue, "@K&%#*?$"],
             [Fore.magenta, "MW>86RBE"],
             [Fore.green, "=3~xdVN<"],
-            [Fore.light_blue, ":;\"'`"],
+            [Fore.light_blue, ":;\\\"'`"],
             [Fore.light_magenta, "qojsei"],
             [Fore.light_green, "/.,|_-"],
         ],
