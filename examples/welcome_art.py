@@ -39,7 +39,7 @@ bin_path = "ca-1d"
 
 unix_epoch_millis = int(time() * 1000)
 
-# Note: in C seed parameter is truncated to UINT_MAX
+# NOTE: in C seed parameter is truncated to UINT_MAX
 # while in Python it is not
 seed(unix_epoch_millis)
 
