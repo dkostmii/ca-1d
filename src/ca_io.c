@@ -1,4 +1,5 @@
 #include "include/ca_io.h"
+#include "include/ca.h"
 #include "include/math_op.h"
 #include "include/params.h"
 #include <stddef.h>
@@ -18,8 +19,8 @@ print_state (int *state, Params params)
   char map[map_len + 1];
   int id = 0;
 
-  map[0] = params.map_dead;
-  map[1] = params.map_alive;
+  map[0] = CHAR_DEAD;
+  map[1] = CHAR_ALIVE;
   map[2] = '\0';
 
   for (int i = 0; i < params.width; i++)

@@ -25,17 +25,9 @@ create_params (Params **result)
       return -1;
     }
 
-  (*result)->rule = 90;
-  (*result)->height = 10;
-  (*result)->width = 11;
-
-  (*result)->map_alive = 'X';
-  (*result)->map_dead = ' ';
-  (*result)->stdin_char_alive = '1';
-  (*result)->stdin_char_dead = '0';
-
-  (*result)->seed_mode = SEED_MODE_PULSE;
-  (*result)->seed = time (NULL);
+  (*result)->rule = DEFAULT_RULE;
+  (*result)->height = DEFAULT_HEIGHT;
+  (*result)->width = DEFAULT_WIDTH;
 
   return 0;
 }

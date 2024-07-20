@@ -18,7 +18,6 @@ main (int argc, char **argv)
 
   if (argc > 1)
     {
-      // NOTE: srand(params->seed) call insied parse_args
       int parse_res = parse_args (argc, argv, params);
 
       if (parse_res < 0)
@@ -87,11 +86,10 @@ main (int argc, char **argv)
           return -1;
         }
 
-      int *seed_state = NULL;
+      int *stdin_seed_state = NULL;
 
-      int parse_state_str_res = parse_state_str (
-          input_pipe, &seed_state, params->width, params->stdin_char_alive,
-          params->stdin_char_dead);
+      int parse_state_str_res
+          = parse_state_str (input_pipe, &stdin_seed_state, params->width);
 
       if (parse_state_str_res < 0)
         {
@@ -112,7 +110,7 @@ main (int argc, char **argv)
               free (initial_state);
             }
 
-          initial_state = seed_state;
+          initial_state = stdin_seed_state;
         }
 
       free (input_pipe);
@@ -128,8 +126,7 @@ main (int argc, char **argv)
           return -1;
         }
 
-      int seed_res
-          = seed_state (&initial_state, params->width, params->seed_mode);
+      int seed_res = seed_state_pulse (&initial_state, params->width);
 
       if (seed_res < 0 && initial_state != NULL)
         {
