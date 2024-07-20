@@ -52,6 +52,7 @@ width = default_width
 use_color = False
 help = False
 animate = False
+animation_height = 1
 
 map_alive = choice([
     "@",
@@ -130,6 +131,15 @@ if len(sys.argv) > 1:
     next_args_len = len(args)
 
     animate = prev_args_len != next_args_len
+
+    prev_args_len = next_args_len
+
+    for id, arg in enumerate(args):
+        if arg.startswith("-ah=") or arg.startswith("--animation-height="):
+            args.pop(id)
+            animation_height = max(1, int(arg.split('=')[1]))
+
+    next_args_len = len(args)
 
     if next_args_len > 1:
         try:
@@ -210,11 +220,7 @@ def main():
                 "ca-1d",
                 "--height=50",
                 f"--width={width}",
-                (
-                    f"--height={height_range[0]}-{height_range[1]}"
-                    if height is None
-                    else f"--height={height}"
-                ),
+                "--height=inf",
                 f"--map_alive={map_alive}",
                 f"--map_dead={map_dead}",
             ],
@@ -222,6 +228,8 @@ def main():
             stdout=subprocess.PIPE,
         )
         stdout_end = False
+
+        buffer = []
 
         while not stdout_end:
             line = proc.stdout.readline()
@@ -236,8 +244,13 @@ def main():
 
                     result += ch
                 result = result.replace("\n", "")
-                print(f"\r{result}", end="")
-                sleep(0.1)
+
+                buffer.append(result)
+                system("clear")
+                print("\r" + "\n".join(buffer))
+
+                if len(buffer) > animation_height:
+                    buffer.pop(0)
 
         return
 
