@@ -252,6 +252,10 @@ def main():
                 if len(buffer) > animation_height:
                     buffer.pop(0)
 
+                try:
+                    sleep(0.1)
+                except KeyboardInterrupt:
+                    exit(0)
         return
 
     command_output = subprocess.check_output(
