@@ -218,12 +218,14 @@ def main():
     if animate:
         proc = subprocess.Popen(
             [
-                "ca-1d",
-                "--height=50",
+                bin_path,
+                "--rule=110,22,108,30,218,45,18,24,54,184,90,126,250,150,66,99,182",
                 f"--width={width}",
                 "--height=inf",
                 f"--map_alive={map_alive}",
                 f"--map_dead={map_dead}",
+                "--seed_mode=r",
+                f"--seed={unix_epoch_millis}",
             ],
             encoding="utf-8",
             stdout=subprocess.PIPE,
