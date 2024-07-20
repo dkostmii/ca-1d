@@ -108,7 +108,7 @@ map_dead = choice([
 def print_usage():
     print("Usage:")
     print(
-        f"    python welcome_art.py [width={default_width}] [height={height_range[0]}-{height_range[1]}|inf] [-c|--color] [-h|--help] [-a|--animate]"
+        f"    python welcome_art.py [width={default_width}] [height={height_range[0]}-{height_range[1]}|inf] [-c|--color] [-h|--help] [-a|--animate] [-ah=1|--animation-height=1]"
     )
 
 
