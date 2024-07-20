@@ -1,6 +1,6 @@
 import subprocess
 import sys
-from random import randint, seed
+from random import randint, seed, choice
 from time import sleep, time
 
 from colored import Fore, Style
@@ -53,6 +53,55 @@ use_color = False
 help = False
 animate = False
 
+map_alive = choice([
+    "@",
+    r"K",
+    r"\&",
+    r"\%",
+    r"\#",
+    r"\*",
+    r"\?",
+    r"\$",
+    r"\=",
+    "M",
+    "W",
+    r"\>",
+    "8",
+    "6",
+    "R",
+    "B",
+    "E",
+    "3",
+    "~",
+    "x",
+    "d",
+    "V",
+    "N",
+    r"\<",
+])
+
+map_dead = choice([
+    r"e",
+    r"\ ",
+    r"i",
+    r"\:",
+    r"\;"
+    r"\"",
+    r"\'",
+    r"\`",
+    r"\/",
+    "\\",
+    r"\ ",
+    ".",
+    r"\,",
+    r"\|",
+    r"_",
+    r"\-",
+    r"q",
+    r"o",
+    r"j",
+    r"s",
+])
 
 def print_usage():
     print("Usage:")
@@ -122,8 +171,8 @@ command = [
         if height is None
         else f"--height={height}"
     ),
-    r"--map_alive=@K\&\%\#\*\?\$\=MW\>86RBE3~xdVN\<",
-    r"--map_dead=e\ i\:\;\"\'\`\/\\\ .\,\|_-qojs",
+    f"--map_alive={map_alive}",
+    f"--map_dead={map_dead}",
     "--seed_mode=r",
     f"--seed={unix_epoch_millis}",
 ]
@@ -160,14 +209,14 @@ def main():
             [
                 "ca-1d",
                 "--height=50",
-                "--map_alive=#",
-                "--map_dead=o",
                 f"--width={width}",
                 (
                     f"--height={height_range[0]}-{height_range[1]}"
                     if height is None
                     else f"--height={height}"
                 ),
+                f"--map_alive={map_alive}",
+                f"--map_dead={map_dead}",
             ],
             encoding="utf-8",
             stdout=subprocess.PIPE,
