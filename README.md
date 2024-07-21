@@ -32,6 +32,10 @@ Result:
 
 `STDIN` is not required.
 
+Example usage is showed in animated Python [script](./examples/animation.py):
+
+![Python animation example](./img/example-python-script.png)
+
 ## Installing
 
 This installs binary to system:
