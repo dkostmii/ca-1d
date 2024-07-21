@@ -18,7 +18,6 @@ main (int argc, char **argv)
 
   if (argc > 1)
     {
-      // NOTE: srand(params->seed) call insied parse_args
       int parse_res = parse_args (argc, argv, params);
 
       if (parse_res < 0)
@@ -42,7 +41,7 @@ main (int argc, char **argv)
       return -1;
     }
 
-  int **states = (int **)malloc (params->height * sizeof (int *));
+  int *initial_state = NULL;
 
   int stdin_fileno = fileno (stdin);
   int is_atty_res = isatty (stdin_fileno) == 0;
@@ -52,7 +51,6 @@ main (int argc, char **argv)
 
   if (fstat_res < 0)
     {
-      free (states);
       destroy_params (params);
       return -1;
     }
@@ -63,7 +61,6 @@ main (int argc, char **argv)
 
   if (mode_is_valid == 0)
     {
-      free (states);
       destroy_params (params);
       return -1;
     }
@@ -76,7 +73,6 @@ main (int argc, char **argv)
 
       if (input_pipe == NULL)
         {
-          free (states);
           destroy_params (params);
           return -1;
         }
@@ -86,21 +82,18 @@ main (int argc, char **argv)
       if (fgets_res == NULL)
         {
           free (input_pipe);
-          free (states);
           destroy_params (params);
           return -1;
         }
 
-      int *seed_state = NULL;
+      int *stdin_seed_state = NULL;
 
-      int parse_state_str_res = parse_state_str (
-          input_pipe, &seed_state, params->width, params->stdin_char_alive,
-          params->stdin_char_dead);
+      int parse_state_str_res
+          = parse_state_str (input_pipe, &stdin_seed_state, params->width);
 
       if (parse_state_str_res < 0)
         {
           free (input_pipe);
-          free (states);
           destroy_params (params);
           return -1;
         }
@@ -112,12 +105,12 @@ main (int argc, char **argv)
 
       if (parser_empty == 0)
         {
-          if (states[0] != NULL)
+          if (initial_state != NULL)
             {
-              free (states[0]);
+              free (initial_state);
             }
 
-          states[0] = seed_state;
+          initial_state = stdin_seed_state;
         }
 
       free (input_pipe);
@@ -125,72 +118,82 @@ main (int argc, char **argv)
 
   if (is_atty_res == 0 || has_input == 0 || parser_empty == 1)
     {
-      states[0] = (int *)malloc (params->width * sizeof (int));
+      initial_state = (int *)malloc (params->width * sizeof (int));
 
-      if (states[0] == NULL)
+      if (initial_state == NULL)
         {
-          free (states);
           destroy_params (params);
           return -1;
         }
 
-      int seed_res = seed_state (&states[0], params->width, params->seed_mode);
+      int seed_res = seed_state_pulse (&initial_state, params->width);
 
-      if (seed_res < 0 && states[0] != NULL)
+      if (seed_res < 0 && initial_state != NULL)
         {
-          free (states[0]);
+          free (initial_state);
         }
 
       if (seed_res < 0)
         {
-          free (states);
           destroy_params (params);
           return -1;
         }
     }
 
-  for (int i = 1; i < params->height; i++)
+  int print_state_res = print_state (initial_state, *params);
+  if (print_state_res < 0)
+    {
+      free (initial_state);
+      destroy_params (params);
+      return -1;
+    }
+
+  int *prev_state = initial_state;
+
+  for (int i = 1; (i < params->height || params->height == 0); i++)
     {
       int *next_state_arr = NULL;
-      int next_state_err = next_state (states[i - 1], params->width,
-                                       params->rule, &next_state_arr);
+      int next_state_err = next_state (prev_state, params->width, params->rule,
+                                       &next_state_arr);
 
       if (next_state_err < 0 && next_state_arr != NULL)
         {
           free (next_state_arr);
         }
 
+      if (next_state_err < 0 && prev_state != NULL)
+        {
+          free (prev_state);
+        }
+
       if (next_state_err < 0)
         {
-          for (int j = 0; j < i; j++)
-            {
-              free (states[j]);
-            }
-          free (states);
+          free (initial_state);
           destroy_params (params);
+          return -1;
         }
 
-      states[i] = next_state_arr;
-    }
-
-  int print_states_res = print_states (states, *params);
-
-  if (print_states_res < 0)
-    {
-      for (int i = 0; i < params->height; i++)
+      print_state_res = print_state (next_state_arr, *params);
+      if (print_state_res < 0)
         {
-          free (states[i]);
+          free (initial_state);
+          destroy_params (params);
+          return -1;
         }
-      free (states);
-      destroy_params (params);
-      return -1;
+
+      if (prev_state != NULL)
+        {
+          free (prev_state);
+        }
+
+      prev_state = next_state_arr;
     }
 
-  for (int i = 0; i < params->height; i++)
+  if (prev_state != NULL)
     {
-      free (states[i]);
+      free (prev_state);
     }
-  free (states);
+
   destroy_params (params);
 
   return 0;

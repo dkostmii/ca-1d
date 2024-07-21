@@ -1,4 +1,5 @@
 #include "include/parse.h"
+#include "include/ca.h"
 #include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -6,8 +7,7 @@
 #include <string.h>
 
 int
-parse_state_str (char *state_str, int **result, int expected_result_width,
-                 char char_alive, char char_dead)
+parse_state_str (char *state_str, int **result, int expected_result_width)
 {
   if (state_str == NULL)
     {
@@ -58,11 +58,11 @@ parse_state_str (char *state_str, int **result, int expected_result_width,
         {
           char cell_ch = state_str[i];
 
-          if (cell_ch == char_alive)
+          if (cell_ch == CHAR_ALIVE)
             {
               *(*result + i) = 1;
             }
-          else if (cell_ch == char_dead)
+          else if (cell_ch == CHAR_DEAD)
             {
               *(*result + i) = 0;
             }

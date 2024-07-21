@@ -6,9 +6,6 @@
 
 const int NEIGHBOURHOOD_LEN = 3;
 
-const int SEED_MODE_PULSE = 0;
-const int SEED_MODE_RANDOM = 1;
-
 int
 next_cell_state (int *neighbourhood, int rule)
 {
@@ -172,7 +169,7 @@ next_state (int *state, int state_len, int rule, int **next)
 }
 
 int
-seed_state (int **state, int state_len, int seed_mode)
+seed_state_pulse (int **state, int state_len)
 {
   if (state == NULL || *state == NULL)
     {
@@ -184,37 +181,14 @@ seed_state (int **state, int state_len, int seed_mode)
       return -1;
     }
 
-  if (seed_mode == SEED_MODE_PULSE)
+  for (int i = 0; i < state_len; i++)
     {
-      for (int i = 0; i < state_len; i++)
-        {
-          *(*state + i) = 0;
-        }
-
-      int half = (state_len - 1) / 2;
-
-      *(*state + half) = 1;
+      *(*state + i) = 0;
     }
-  else if (seed_mode == SEED_MODE_RANDOM)
-    {
-      int rand_state = rand ();
-      int prev_rand_state = 0;
-      for (int i = 0; i < state_len; i++)
-        {
-          *(*state + i) = rand_state & 1;
-          prev_rand_state = rand_state;
-          rand_state = rand_state >> 1;
 
-          if (rand_state == prev_rand_state)
-            {
-              rand_state = rand ();
-            }
-        }
-    }
-  else
-    {
-      return -1;
-    }
+  int half = (state_len - 1) / 2;
+
+  *(*state + half) = 1;
 
   return 0;
 }
