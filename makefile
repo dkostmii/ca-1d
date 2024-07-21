@@ -1,6 +1,8 @@
 # Thanks to Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
 TARGET_EXEC := ca-1d
 
+PACKAGE_DIR := ./package
+PACKAGE_NAME := ca-1d.zip
 BUILD_DIR := ./build/release
 DBG_DIR := ./build/debug
 SRC_DIRS := ./src
@@ -70,6 +72,12 @@ install: all
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f ${BUILD_DIR}/${TARGET_EXEC} ${DESTDIR}${PREFIX}/bin
 	@chmod 755 ${DESTDIR}${PREFIX}/bin/${TARGET_EXEC}
+
+package: all
+	@echo packaging executable file to ${PACKAGE_DIR}/${PACKAGE_NAME}
+	@mkdir -p ${PACKAGE_DIR}/${TARGET_EXEC}
+	@cp -f ${BUILD_DIR}/${TARGET_EXEC} ${PACKAGE_DIR}/${TARGET_EXEC}/${TARGET_EXEC}
+	@zip -r ${PACKAGE_DIR}/${PACKAGE_NAME} ${PACKAGE_DIR}/${TARGET_EXEC}
 
 uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
