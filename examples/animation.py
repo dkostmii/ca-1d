@@ -174,7 +174,7 @@ seed_state = choice(
     ]
 )
 
-bin_path = "/home/dkostmii/Projects/ca-1d/build/release/ca-1d"
+bin_path = "ca-1d"
 command = [
     bin_path,
     f"--rule={rule}",
