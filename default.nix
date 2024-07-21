@@ -17,8 +17,8 @@ stdenv.mkDerivation {
   '';
 
   meta = with pkgs.lib; {
-    description = "Elementary cellular automata";
-    license = licenses.gpl3Only;
+    description = "Elementary cellular automata CLI, written in C.";
+    license = licenses.gpl3;
     platforms = platforms.all;
     homepage = "https://github.com/dkostmii/ca-1d";
   };
